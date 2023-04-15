@@ -570,10 +570,8 @@ handle_server_list(Connection &c, const void *data, size_t length)
     auto p = (const struct uo_packet_server_list *)data;
 
     (void)c;
-
     assert(length > 0);
-
-    if (length < sizeof(*p) || p->unknown_0x5d != 0x5d)
+    if (length < sizeof(*p))
         return PacketAction::DISCONNECT;
 
     const unsigned count = p->num_game_servers;
@@ -582,12 +580,9 @@ handle_server_list(Connection &c, const void *data, size_t length)
     const auto *server_info = p->game_servers;
     if (length != sizeof(*p) + (count - 1) * sizeof(*server_info))
         return PacketAction::DISCONNECT;
-
     c.client.server_list = {p, length};
-
     if (c.instance.config.antispy)
         send_antispy(c.client.client);
-
     if (c.client.reconnecting) {
         struct uo_packet_play_server p2 = {
             .cmd = PCK_PlayServer,
@@ -596,10 +591,7 @@ handle_server_list(Connection &c, const void *data, size_t length)
 
         uo_client_send(c.client.client, &p2, sizeof(p2));
 
-        return PacketAction::DROP;
-    }
-
-    for (unsigned i = 0; i < count; i++, server_info++) {
+    for (unsigned i = 1; i < count+1; i++, server_info++) {
         const unsigned k = server_info->index;
         if (k != i)
             return PacketAction::DISCONNECT;
@@ -609,7 +601,6 @@ handle_server_list(Connection &c, const void *data, size_t length)
                   server_info->name,
                   (unsigned)server_info->address);
     }
-
     /* forward only to the clients which are waiting for the server
        list (should be only one) */
     for (auto &ls : c.servers) {
