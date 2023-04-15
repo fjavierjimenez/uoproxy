@@ -590,6 +590,7 @@ handle_server_list(Connection &c, const void *data, size_t length)
         };
 
         uo_client_send(c.client.client, &p2, sizeof(p2));
+    }
 
     for (unsigned i = 1; i < count+1; i++, server_info++) {
         const unsigned k = server_info->index;
