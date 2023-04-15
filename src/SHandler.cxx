@@ -690,10 +690,20 @@ handle_extended(Connection &c, const void *data, size_t length)
 
     if (length < sizeof(*p))
         return PacketAction::DISCONNECT;
-
     LogFormat(8, "from server: extended 0x%04x\n", (unsigned)p->extended_cmd);
 
+    struct uo_packet_confirm_orion_version response = {
+        .cmd = PCK_Extended,
+        .length = 0x000B,
+        .extended_cmd = 0xFACE,
+        .extended_sub_cmd = 0x0034,
+        .orion_version = 0x01003201
+    };    
     switch (p->extended_cmd) {
+    case 0xFACE:
+        uo_client_send(c.client.client, &response, sizeof(response));
+        return PacketAction::DROP;
+        break;
     case 0x0008:
         if (length <= sizeof(c.client.world.packet_map_change))
             memcpy(&c.client.world.packet_map_change, data, length);
@@ -750,6 +760,13 @@ handle_protocol_extension(Connection &c, const void *data, size_t length)
     return PacketAction::ACCEPT;
 }
 
+static PacketAction
+handle_show_public_house_content(Connection &c, const void *data, size_t length)
+{
+
+    return PacketAction::ACCEPT;
+}
+
 const struct client_packet_binding server_packet_bindings[] = {
     { PCK_MobileStatus, handle_mobile_status }, /* 0x11 */
     { PCK_WorldItem, handle_world_item }, /* 0x1a */
@@ -786,5 +803,6 @@ const struct client_packet_binding server_packet_bindings[] = {
     { PCK_Extended, handle_extended }, /* 0xbf */
     { PCK_WorldItem7, handle_world_item_7 }, /* 0xf3 */
     { PCK_ProtocolExtension, handle_protocol_extension }, /* 0xf0 */
+    { PCK_ShowPublicHouseContent, handle_show_public_house_content }, /* 0xfb */
     {}
 };
