@@ -701,6 +701,18 @@ struct uo_packet_extended {
 
 static_assert(alignof(struct uo_packet_extended) == 1);
 
+/* 0xbf Confirm Orion Version */
+struct uo_packet_confirm_orion_version {
+    /* B0BF W000B W0FACE W0034 D0V1V2V3V4 */
+    uint8_t cmd; /* 0xBF */
+    PackedBE16 length; /* 0x000B */
+    PackedBE16 extended_cmd; /* 0xFACE */
+    PackedBE16 extended_sub_cmd; /* 0x0034 */
+    PackedBE32 orion_version; /* 0x01003201*/
+};
+static_assert(alignof(struct uo_packet_confirm_orion_version) == 1);
+
+
 /* 0xd9 Hardware */
 struct uo_packet_hardware {
     uint8_t cmd;

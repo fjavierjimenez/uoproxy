@@ -236,4 +236,5 @@ enum uo_packet_type_t {
     PCK_ProtocolExtension = 0xf0,
     PCK_WorldItem7 = 0xf3,
     PCK_CreateCharacter7 = 0xf8,
+    PCK_ShowPublicHouseContent = 0xfb,
 };
